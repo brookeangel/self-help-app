@@ -18,6 +18,7 @@ parser : Parser (Route -> a) a
 parser =
     Parser.oneOf
         [ Parser.map Programs Parser.top
+        , Parser.map Programs (s "programs")
         , Parser.map Section (s "sections" </> int)
         ]
 

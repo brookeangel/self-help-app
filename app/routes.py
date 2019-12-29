@@ -4,14 +4,12 @@ from app.models import Program, Section
 from sqlalchemy.orm import joinedload, Load
 
 @app.route('/')
-def index():
+@app.route('/programs') # Handled by SPA
+@app.route('/sections/<section_id>') # Handled by SPA
+def index(section_id=None):
     return render_template('index.html')
 
-@app.route('/sections/<id>')
-def sections(id):
-    return render_template('index.html')
-
-@app.route('/programs')
+@app.route('/api/programs')
 def programs():
     programs = Program.query.options(joinedload(Program.sections, innerjoin=True)).all()
 

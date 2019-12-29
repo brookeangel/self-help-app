@@ -62,7 +62,7 @@ init =
     ( { data = Loading
       , openModal = NoModal
       }
-    , RemoteData.Http.get "/programs" ReceiveData programsDecoder
+    , RemoteData.Http.get "/api/programs" ReceiveData programsDecoder
     )
 
 
