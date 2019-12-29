@@ -96,8 +96,9 @@ viewPrograms programs =
 viewSections : List SectionOverview -> Html Msg
 viewSections sections =
     sections
-        |> List.indexedMap
-            (\index section ->
+        |> List.sortBy .orderIndex
+        |> List.map
+            (\section ->
                 Html.a
                     [ Attributes.href (Route.toString (Route.Section section.id))
                     ]
@@ -106,7 +107,7 @@ viewSections sections =
                         , Attributes.alt ""
                         ]
                         []
-                    , Html.p [] [ Html.text ("Part " ++ String.fromInt index) ] -- TODO: this should be the "word" version of the string, e.g. "one"
+                    , Html.p [] [ Html.text ("Part " ++ String.fromInt section.orderIndex) ] -- TODO: this should be the "word" version of the string, e.g. "one"
                     , Html.h3 [] [ Html.text section.name ]
                     ]
             )
