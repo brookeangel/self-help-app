@@ -2,5 +2,14 @@
 
 {% block content %}
   <h1>Self Help Programs</h1>
-  <p>Loading...</p>
+  <div id="elm-host"></div>
+{% endblock %}
+
+{% block js %}
+  <script src="/static/js/index.js" charset="utf-8"></script>
+  <script type="text/javascript">
+    var app = Elm.Main.init({
+      node: document.getElementById('elm-host')
+    });
+  </script>
 {% endblock %}

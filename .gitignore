@@ -1,2 +1,5 @@
 __pycache__/
 venv/
+elm-stuff/
+node_modules/
+app/static/js/*.js

@@ -1,0 +1,16 @@
+{
+  "name": "modern-health",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "TODO",
+    "build-elm": "elm make ui/Main.elm --output app/static/js/index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {},
+  "devDependencies": {
+    "elm": "^0.19.1-3"
+  }
+}
