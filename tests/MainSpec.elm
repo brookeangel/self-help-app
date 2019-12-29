@@ -48,4 +48,25 @@ tests =
                     |> ProgramTest.ensureViewHas [ Selector.text "Core pillars description" ]
                     |> ProgramTest.clickButton "x"
                     |> ProgramTest.expectViewHasNot [ Selector.text "Core pillars description" ]
+        , test "Renders a list sections" <|
+            \() ->
+                init
+                    |> ProgramTest.within
+                        (Query.find
+                            [ Selector.tag "section"
+                            , Selector.containing
+                                [ Selector.text "Core Pillars"
+                                ]
+                            ]
+                        )
+                        (\context ->
+                            context
+                                |> ProgramTest.ensureViewHas
+                                    [ Selector.text "Core Section 1"
+                                    ]
+                                |> ProgramTest.ensureViewHas
+                                    [ Selector.text "Core Section 2"
+                                    ]
+                        )
+                    |> ProgramTest.done
         ]

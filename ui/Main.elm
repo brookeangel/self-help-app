@@ -4,6 +4,7 @@ import Browser
 import Dialog
 import Dict exposing (Dict)
 import Html exposing (Html)
+import Html.Attributes as Attributes
 import Html.Events as Events
 
 
@@ -36,6 +37,18 @@ type alias HealthProgram =
     { id : ProgramId
     , name : String
     , description : String
+    , sections : List Section
+    }
+
+
+type alias SectionId =
+    Int
+
+
+type alias Section =
+    { id : SectionId
+    , name : String
+    , overviewImage : String
     }
 
 
@@ -51,19 +64,30 @@ init () =
             [ { id = 1
               , name = "Core Pillars"
               , description = "Core pillars description"
+              , sections =
+                    [ { id = 101
+                      , name = "Core Section 1"
+                      , overviewImage = "http://placecorgi.com/250"
+                      }
+                    , { id = 102
+                      , name = "Core Section 2"
+                      , overviewImage = "http://placekitten.com/200/200"
+                      }
+                    ]
               }
             , { id = 2
               , name = "The Next Level"
               , description = "The next level description"
+              , sections = []
               }
             ]
     in
     ( { programs = programs
-      , openModal = NoModal
       , programsById =
             programs
                 |> List.map (\program -> ( program.id, program ))
                 |> Dict.fromList
+      , openModal = NoModal
       }
     , Cmd.none
     )
@@ -109,6 +133,27 @@ viewPrograms programs =
                         ]
                         [ Html.text "Learn More"
                         ]
+                    , viewSections program.sections
+                    ]
+            )
+        |> Html.div []
+
+
+{-| TODO: ensure ordering
+-}
+viewSections : List Section -> Html Msg
+viewSections sections =
+    sections
+        |> List.indexedMap
+            (\index section ->
+                Html.button []
+                    [ Html.img
+                        [ Attributes.src section.overviewImage
+                        , Attributes.alt ""
+                        ]
+                        []
+                    , Html.p [] [ Html.text ("Part " ++ String.fromInt index) ] -- TODO: this should be the "word" version of the string, e.g. "one"
+                    , Html.h3 [] [ Html.text section.name ]
                     ]
             )
         |> Html.div []
