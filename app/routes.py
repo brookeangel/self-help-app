@@ -1,6 +1,6 @@
 from app import app
+from flask import render_template
 
 @app.route('/')
-@app.route('/index')
 def index():
-    return "Modern Health"
+    return render_template('index.html', title="Self Help Programs")
