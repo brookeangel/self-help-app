@@ -1,5 +1,10 @@
 # Modern Health
 
+## Future Directions
+Important things to add that are not-yet-here:
+- Python tests
+- Generalize frontend build (right now, we only build one Elm app, but this should be generalized to build more)
+
 ## Development
 
 - This project uses Python3 & PSQL; make sure you have those installed first
