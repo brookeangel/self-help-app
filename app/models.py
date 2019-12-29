@@ -6,10 +6,18 @@ class Program(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(), nullable=False, unique=True)
     description = db.Column(db.String(), nullable=False)
-    sections = db.relationship('Section', backref='program', lazy='dynamic')
+    sections = db.relationship('Section', backref='program')
 
     def __repr__(self):
         return '<Program {}>'.format(self.name)
+
+    def serialize(self):
+        return {
+            'id'           : self.id,
+            'name'         : self.name,
+            'description'  : self.description,
+            'sections'     : [i.serialize() for i in self.sections]
+        }
 
 class Section(db.Model):
     __tablename__ = 'sections'
@@ -27,3 +35,13 @@ class Section(db.Model):
 
     def __repr__(self):
         return '<Program {}>'.format(self.name)
+
+    def serialize(self):
+        return {
+            'id'           : self.id,
+            'name'         : self.name,
+            'description'  : self.description,
+            'overview_image'  : self.overview_image,
+            'order_index'  : self.order_index,
+            'html_content' : self.html_content
+        }
