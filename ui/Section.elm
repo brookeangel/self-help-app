@@ -1,48 +1,44 @@
-module Section exposing (Model, Msg(..), init, update, view)
+module Section exposing (view)
 
 import Dialog
 import Dict exposing (Dict)
 import Html exposing (Html)
 import Html.Attributes as Attributes
+import Html.Attributes.Extra as Attributes
 import Html.Events as Events
-import Json.Decode as Decode exposing (Decoder)
-import Json.Decode.Pipeline as Decode
 import RemoteData exposing (RemoteData(..), WebData)
 import RemoteData.Http
 import Route
+import Types exposing (Section)
 import Url exposing (Url)
 
 
+view : WebData Section -> Html msg
+view webdata =
+    case webdata of
+        Success section ->
+            Html.section []
+                [ Html.h1 []
+                    [ Html.text
+                        ("Part "
+                            ++ String.fromInt section.orderIndex
+                            -- TODO: should be word, e.g. "one"
+                            ++ ": "
+                            ++ section.name
+                        )
+                    ]
+                , Html.div
+                    []
+                    [ Html.div
+                        [ Attributes.stringProperty "innerHTML" section.htmlContent ]
+                        []
+                    , Html.img [ Attributes.src section.overviewImage ] []
+                    , Html.a [ Attributes.href "/" ] [ Html.text "Go Back" ]
+                    ]
+                ]
 
--- MODEL
+        Loading ->
+            Html.text "Loading..."
 
-
-type alias Model =
-    ()
-
-
-init : Int -> Model
-init id =
-    ()
-
-
-
--- UPDATE
-
-
-type Msg
-    = NoOp
-
-
-update : Msg -> Model -> Model
-update msg model =
-    model
-
-
-
--- VIEW
-
-
-view : Model -> Html Msg
-view model =
-    Html.text "sections"
+        _ ->
+            Html.text "Error"

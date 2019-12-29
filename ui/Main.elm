@@ -47,7 +47,7 @@ type alias Model key =
 type Page
     = NotFound
     | HealthProgram HealthProgram.Model
-    | Section Section.Model
+    | Section SectionId
 
 
 init : () -> Url -> key -> ( Model key, Effect )
@@ -86,9 +86,6 @@ changeRouteTo maybeRoute model =
 
                 Just (Route.Section id) ->
                     let
-                        sectionModel =
-                            Section.init id
-
                         effect =
                             case Dict.get id model.sectionData of
                                 Nothing ->
@@ -99,7 +96,7 @@ changeRouteTo maybeRoute model =
                                     -- Already fetched, do nothing
                                     NoEffect
                     in
-                    ( Section sectionModel
+                    ( Section id
                     , effect
                     )
     in
@@ -116,7 +113,6 @@ type Msg
     = HandleUrlRequest Browser.UrlRequest
     | HandleUrlChange Url
     | HealthProgramMsg HealthProgram.Msg
-    | SectionMsg Section.Msg
     | ReceiveProgramData (WebData (List HealthProgram))
     | ReceiveSectionData (WebData Section)
 
@@ -134,23 +130,6 @@ update msg model =
                                 healthProgramModel
                     in
                     ( { model | page = HealthProgram newModel }
-                    , NoEffect
-                    )
-
-                _ ->
-                    -- Not possible
-                    ( model, NoEffect )
-
-        SectionMsg sectionMsg ->
-            case model.page of
-                Section sectionModel ->
-                    let
-                        newModel =
-                            Section.update
-                                sectionMsg
-                                sectionModel
-                    in
-                    ( { model | page = Section newModel }
                     , NoEffect
                     )
 
@@ -250,10 +229,13 @@ view model =
                 ]
             }
 
-        Section sectionModel ->
+        Section id ->
+            let
+                sectionWebdata =
+                    Dict.get id model.sectionData
+                        |> Maybe.withDefault Loading
+            in
             { title = "Self Help Section"
             , body =
-                [ Section.view sectionModel
-                    |> Html.map SectionMsg
-                ]
+                [ Section.view sectionWebdata ]
             }
