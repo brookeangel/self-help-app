@@ -28,3 +28,6 @@ Important things to add that are not-yet-here:
 ### Start Server
 - Start the project: `flask run`
 - View in your browser at `localhost:5000`
+
+### Testing
+- Elm tests: `npm test`
