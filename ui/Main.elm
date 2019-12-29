@@ -1,11 +1,13 @@
 module Main exposing (Model, Msg(..), init, main, update, view)
 
 import Browser
-import Browser.Navigation exposing (Key)
+import Browser.Navigation as Navigation exposing (Key)
 import Dialog
 import Dict exposing (Dict)
 import HealthProgram
 import Html exposing (Html)
+import Route exposing (Route)
+import Section
 import Url exposing (Url)
 
 
@@ -25,17 +27,46 @@ main =
 -- MODEL
 
 
-type Model
-    = HealthProgram HealthProgram.Model
+type alias Model =
+    { key : Key
+    , page : Page
+    }
 
 
-init : () -> Url -> key -> ( Model, Cmd Msg )
-init () url _ =
+type Page
+    = NotFound
+    | HealthProgram HealthProgram.Model
+    | Section Section.Model
+
+
+init : () -> Url -> Key -> ( Model, Cmd Msg )
+init () url key =
+    changeRouteTo (Route.fromUrl url) key
+
+
+changeRouteTo : Maybe Route -> Key -> ( Model, Cmd Msg )
+changeRouteTo maybeRoute key =
     let
-        ( model, cmd ) =
-            HealthProgram.init
+        ( page, theCmd ) =
+            case maybeRoute of
+                Nothing ->
+                    ( NotFound, Cmd.none )
+
+                Just Route.Programs ->
+                    let
+                        ( model, cmd ) =
+                            HealthProgram.init
+                    in
+                    ( HealthProgram model, Cmd.map HealthProgramMsg cmd )
+
+                Just (Route.Section id) ->
+                    let
+                        ( model, cmd ) =
+                            Section.init id
+                    in
+                    ( Section model, Cmd.map SectionMsg cmd )
     in
-    ( HealthProgram model, Cmd.map HealthProgramMsg cmd )
+    ( { key = key, page = page }, theCmd )
 
 
 
@@ -46,13 +77,14 @@ type Msg
     = HandleUrlRequest Browser.UrlRequest
     | HandleUrlChange Url
     | HealthProgramMsg HealthProgram.Msg
+    | SectionMsg Section.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         HealthProgramMsg healthProgramMsg ->
-            case model of
+            case model.page of
                 HealthProgram healthProgramModel ->
                     let
                         ( newModel, cmd ) =
@@ -60,17 +92,46 @@ update msg model =
                                 healthProgramMsg
                                 healthProgramModel
                     in
-                    ( HealthProgram newModel
+                    ( { model | page = HealthProgram newModel }
                     , Cmd.map HealthProgramMsg cmd
                     )
 
+                _ ->
+                    -- Not possible
+                    ( model, Cmd.none )
+
+        SectionMsg sectionMsg ->
+            case model.page of
+                Section sectionModel ->
+                    let
+                        ( newModel, cmd ) =
+                            Section.update
+                                sectionMsg
+                                sectionModel
+                    in
+                    ( { model | page = Section newModel }
+                    , Cmd.map SectionMsg cmd
+                    )
+
+                _ ->
+                    -- Not possible
+                    ( model, Cmd.none )
+
         HandleUrlRequest request ->
-            -- TODO
-            ( model, Cmd.none )
+            case request of
+                Browser.Internal url ->
+                    ( model
+                    , Navigation.pushUrl model.key
+                        (Url.toString url)
+                    )
+
+                Browser.External href ->
+                    ( model
+                    , Navigation.load href
+                    )
 
         HandleUrlChange url ->
-            -- TODO
-            ( model, Cmd.none )
+            changeRouteTo (Route.fromUrl url) model.key
 
 
 
@@ -79,11 +140,24 @@ update msg model =
 
 view : Model -> Browser.Document Msg
 view model =
-    case model of
+    case model.page of
+        NotFound ->
+            { title = "Not found"
+            , body = [ Html.text "Not found" ]
+            }
+
         HealthProgram healthProgramModel ->
             { title = "Self Help Programs"
             , body =
                 [ HealthProgram.view healthProgramModel
                     |> Html.map HealthProgramMsg
+                ]
+            }
+
+        Section sectionModel ->
+            { title = "Self Help Section"
+            , body =
+                [ Section.view sectionModel
+                    |> Html.map SectionMsg
                 ]
             }

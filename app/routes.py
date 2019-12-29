@@ -5,7 +5,11 @@ from sqlalchemy.orm import joinedload, Load
 
 @app.route('/')
 def index():
-    return render_template('index.html', title="Self Help Programs")
+    return render_template('index.html')
+
+@app.route('/sections/<id>')
+def sections(id):
+    return render_template('index.html')
 
 @app.route('/programs')
 def programs():

@@ -9,6 +9,7 @@ import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Pipeline as Decode
 import RemoteData exposing (RemoteData(..), WebData)
 import RemoteData.Http
+import Route
 import Url exposing (Url)
 
 
@@ -171,7 +172,9 @@ viewSections sections =
     sections
         |> List.indexedMap
             (\index section ->
-                Html.button []
+                Html.a
+                    [ Attributes.href (Route.toString (Route.Section section.id))
+                    ]
                     [ Html.img
                         [ Attributes.src section.overviewImage
                         , Attributes.alt ""
