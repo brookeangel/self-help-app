@@ -12,11 +12,14 @@ import Test.Html.Selector as Selector
 
 init : ProgramTest Main.Model Main.Msg (Cmd Main.Msg)
 init =
-    ProgramTest.createElement
+    ProgramTest.createApplication
         { init = Main.init
         , view = Main.view
         , update = Main.update
+        , onUrlRequest = Main.HandleUrlRequest
+        , onUrlChange = Main.HandleUrlChange
         }
+        |> ProgramTest.withBaseUrl "http://myapp.com"
         |> ProgramTest.start ()
         |> ProgramTest.update
             (Main.ReceiveData programMockData)

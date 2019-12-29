@@ -1,6 +1,7 @@
 module Main exposing (Model, Msg(..), init, main, update, view)
 
 import Browser
+import Browser.Navigation exposing (Key)
 import Dialog
 import Dict exposing (Dict)
 import Html exposing (Html)
@@ -10,15 +11,18 @@ import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Pipeline as Decode
 import RemoteData exposing (RemoteData(..), WebData)
 import RemoteData.Http
+import Url exposing (Url)
 
 
 main : Program () Model Msg
 main =
-    Browser.element
+    Browser.application
         { init = init
         , view = view
         , update = update
         , subscriptions = \_ -> Sub.none
+        , onUrlRequest = HandleUrlRequest
+        , onUrlChange = HandleUrlChange
         }
 
 
@@ -66,8 +70,8 @@ type Modal
     | ProgramModal ProgramId
 
 
-init : () -> ( Model, Cmd Msg )
-init () =
+init : () -> Url -> a -> ( Model, Cmd Msg )
+init () _ _ =
     ( { data = Loading
       , openModal = NoModal
       }
@@ -113,6 +117,8 @@ initData programs =
 type Msg
     = SetModal Modal
     | ReceiveData (WebData (List HealthProgram))
+    | HandleUrlRequest Browser.UrlRequest
+    | HandleUrlChange Url
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -130,12 +136,20 @@ update msg model =
                     -- TODO: Error handling
                     ( model, Cmd.none )
 
+        HandleUrlRequest request ->
+            -- TODO
+            ( model, Cmd.none )
+
+        HandleUrlChange url ->
+            -- TODO
+            ( model, Cmd.none )
+
 
 
 -- VIEW
 
 
-view : Model -> Html Msg
+view : Model -> Browser.Document Msg
 view model =
     let
         programContent =
@@ -150,10 +164,12 @@ view model =
                     -- TODO: Add error handling
                     Html.text "Loading..."
     in
-    Html.main_ []
+    { title = "Self Help App"
+    , body =
         [ Html.h1 [] [ Html.text "All Programs" ]
         , programContent
         ]
+    }
 
 
 viewPrograms : List HealthProgram -> Html Msg
