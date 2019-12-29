@@ -10,6 +10,7 @@ import Json.Decode.Pipeline as Decode
 import RemoteData exposing (RemoteData(..), WebData)
 import RemoteData.Http
 import Route
+import Types exposing (..)
 import Url exposing (Url)
 
 
@@ -18,37 +19,7 @@ import Url exposing (Url)
 
 
 type alias Model =
-    { data : WebData ProgramData
-    , openModal : Modal
-    }
-
-
-type alias ProgramData =
-    { programs : List HealthProgram
-    , programsById : Dict ProgramId HealthProgram
-    }
-
-
-type alias ProgramId =
-    Int
-
-
-type alias SectionId =
-    Int
-
-
-type alias HealthProgram =
-    { id : ProgramId
-    , name : String
-    , description : String
-    , sections : List Section
-    }
-
-
-type alias Section =
-    { id : SectionId
-    , name : String
-    , overviewImage : String
+    { openModal : Modal
     }
 
 
@@ -57,44 +28,9 @@ type Modal
     | ProgramModal ProgramId
 
 
-init : ( Model, Cmd Msg )
+init : Model
 init =
-    ( { data = Loading
-      , openModal = NoModal
-      }
-    , RemoteData.Http.get "/api/programs" ReceiveData programsDecoder
-    )
-
-
-programsDecoder : Decoder (List HealthProgram)
-programsDecoder =
-    Decode.list
-        (Decode.succeed HealthProgram
-            |> Decode.required "id" Decode.int
-            |> Decode.required "name" Decode.string
-            |> Decode.required "description" Decode.string
-            |> Decode.required "sections" sectionsDecoder
-        )
-
-
-sectionsDecoder : Decoder (List Section)
-sectionsDecoder =
-    Decode.list
-        (Decode.succeed Section
-            |> Decode.required "id" Decode.int
-            |> Decode.required "name" Decode.string
-            |> Decode.required "overview_image" Decode.string
-        )
-
-
-initData : List HealthProgram -> ProgramData
-initData programs =
-    { programs = programs
-    , programsById =
-        programs
-            |> List.map (\program -> ( program.id, program ))
-            |> Dict.fromList
-    }
+    { openModal = NoModal }
 
 
 
@@ -103,34 +39,24 @@ initData programs =
 
 type Msg
     = SetModal Modal
-    | ReceiveData (WebData (List HealthProgram))
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
+update : Msg -> Model -> Model
 update msg model =
     case msg of
         SetModal modal ->
-            ( { model | openModal = modal }, Cmd.none )
-
-        ReceiveData remoteData ->
-            case remoteData of
-                Success healthPrograms ->
-                    ( { model | data = Success (initData healthPrograms) }, Cmd.none )
-
-                _ ->
-                    -- TODO: Error handling
-                    ( model, Cmd.none )
+            { model | openModal = modal }
 
 
 
 -- VIEW
 
 
-view : Model -> Html Msg
-view model =
+view : Model -> WebData ProgramData -> Html Msg
+view model programData =
     let
         programContent =
-            case model.data of
+            case programData of
                 Success data ->
                     Html.div []
                         [ viewPrograms data.programs
@@ -167,7 +93,7 @@ viewPrograms programs =
 
 {-| TODO: ensure ordering
 -}
-viewSections : List Section -> Html Msg
+viewSections : List SectionOverview -> Html Msg
 viewSections sections =
     sections
         |> List.indexedMap

@@ -21,11 +21,9 @@ type alias Model =
     ()
 
 
-init : Int -> ( Model, Cmd Msg )
+init : Int -> Model
 init id =
-    ( ()
-    , Cmd.none
-    )
+    ()
 
 
 
@@ -36,9 +34,9 @@ type Msg
     = NoOp
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
+update : Msg -> Model -> Model
 update msg model =
-    ( model, Cmd.none )
+    model
 
 
 

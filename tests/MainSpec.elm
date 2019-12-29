@@ -2,7 +2,6 @@ module MainSpec exposing (tests)
 
 import Dict
 import Expect exposing (Expectation)
-import HealthProgram
 import Main
 import ProgramTest exposing (ProgramTest)
 import RemoteData
@@ -11,7 +10,7 @@ import Test.Html.Query as Query
 import Test.Html.Selector as Selector
 
 
-init : ProgramTest Main.Model Main.Msg (Cmd Main.Msg)
+init : ProgramTest (Main.Model ()) Main.Msg Main.Effect
 init =
     ProgramTest.createApplication
         { init = Main.init
@@ -23,7 +22,7 @@ init =
         |> ProgramTest.withBaseUrl "http://myapp.com"
         |> ProgramTest.start ()
         |> ProgramTest.update
-            (Main.HealthProgramMsg <| HealthProgram.ReceiveData programMockData)
+            (Main.ReceiveProgramData programMockData)
 
 
 tests : Test

@@ -1,4 +1,4 @@
-module Main exposing (Model, Msg(..), init, main, update, view)
+module Main exposing (Effect, Model, Msg(..), init, main, update, view)
 
 import Browser
 import Browser.Navigation as Navigation exposing (Key)
@@ -6,17 +6,26 @@ import Dialog
 import Dict exposing (Dict)
 import HealthProgram
 import Html exposing (Html)
+import RemoteData exposing (RemoteData(..), WebData)
+import RemoteData.Http
 import Route exposing (Route)
 import Section
+import Types exposing (HealthProgram, ProgramData)
 import Url exposing (Url)
 
 
-main : Program () Model Msg
+main : Program () (Model Key) Msg
 main =
     Browser.application
-        { init = init
+        { init =
+            \flags url key ->
+                init flags url key
+                    |> Tuple.mapSecond (runEffect key)
         , view = view
-        , update = update
+        , update =
+            \msg model ->
+                update msg model
+                    |> Tuple.mapSecond (runEffect model.key)
         , subscriptions = \_ -> Sub.none
         , onUrlRequest = HandleUrlRequest
         , onUrlChange = HandleUrlChange
@@ -27,9 +36,10 @@ main =
 -- MODEL
 
 
-type alias Model =
-    { key : Key
+type alias Model key =
+    { key : key
     , page : Page
+    , programData : WebData ProgramData
     }
 
 
@@ -39,34 +49,45 @@ type Page
     | Section Section.Model
 
 
-init : () -> Url -> Key -> ( Model, Cmd Msg )
+init : () -> Url -> key -> ( Model key, Effect )
 init () url key =
-    changeRouteTo (Route.fromUrl url) key
+    changeRouteTo (Route.fromUrl url) (initModel key)
 
 
-changeRouteTo : Maybe Route -> Key -> ( Model, Cmd Msg )
-changeRouteTo maybeRoute key =
+initModel : key -> Model key
+initModel key =
+    { key = key
+    , page = NotFound
+
+    -- Requires a page; NotFound is our empty page but we could make this more descriptive, e.g. Loading
+    , programData = Loading
+    }
+
+
+changeRouteTo : Maybe Route -> Model key -> ( Model key, Effect )
+changeRouteTo maybeRoute model =
     let
         ( page, theCmd ) =
             case maybeRoute of
                 Nothing ->
-                    ( NotFound, Cmd.none )
+                    ( NotFound, NoEffect )
 
                 Just Route.Programs ->
-                    let
-                        ( model, cmd ) =
-                            HealthProgram.init
-                    in
-                    ( HealthProgram model, Cmd.map HealthProgramMsg cmd )
+                    ( HealthProgram HealthProgram.init
+                    , GetProgramData
+                      -- TODO: only fetch if the cache isn't populated
+                    )
 
                 Just (Route.Section id) ->
                     let
-                        ( model, cmd ) =
+                        sectionModel =
                             Section.init id
                     in
-                    ( Section model, Cmd.map SectionMsg cmd )
+                    ( Section sectionModel, NoEffect )
     in
-    ( { key = key, page = page }, theCmd )
+    ( { model | page = page }
+    , theCmd
+    )
 
 
 
@@ -78,67 +99,105 @@ type Msg
     | HandleUrlChange Url
     | HealthProgramMsg HealthProgram.Msg
     | SectionMsg Section.Msg
+    | ReceiveProgramData (WebData (List HealthProgram))
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
+update : Msg -> Model key -> ( Model key, Effect )
 update msg model =
     case msg of
         HealthProgramMsg healthProgramMsg ->
             case model.page of
                 HealthProgram healthProgramModel ->
                     let
-                        ( newModel, cmd ) =
+                        newModel =
                             HealthProgram.update
                                 healthProgramMsg
                                 healthProgramModel
                     in
                     ( { model | page = HealthProgram newModel }
-                    , Cmd.map HealthProgramMsg cmd
+                    , NoEffect
                     )
 
                 _ ->
                     -- Not possible
-                    ( model, Cmd.none )
+                    ( model, NoEffect )
 
         SectionMsg sectionMsg ->
             case model.page of
                 Section sectionModel ->
                     let
-                        ( newModel, cmd ) =
+                        newModel =
                             Section.update
                                 sectionMsg
                                 sectionModel
                     in
                     ( { model | page = Section newModel }
-                    , Cmd.map SectionMsg cmd
+                    , NoEffect
                     )
 
                 _ ->
                     -- Not possible
-                    ( model, Cmd.none )
+                    ( model, NoEffect )
 
         HandleUrlRequest request ->
             case request of
                 Browser.Internal url ->
                     ( model
-                    , Navigation.pushUrl model.key
-                        (Url.toString url)
+                    , PushUrl url
                     )
 
                 Browser.External href ->
                     ( model
-                    , Navigation.load href
+                    , LoadUrl href
                     )
 
         HandleUrlChange url ->
-            changeRouteTo (Route.fromUrl url) model.key
+            changeRouteTo (Route.fromUrl url) model
+
+        ReceiveProgramData remoteData ->
+            case remoteData of
+                Success healthPrograms ->
+                    ( { model
+                        | programData =
+                            Success
+                                (Types.initProgramData healthPrograms)
+                      }
+                    , NoEffect
+                    )
+
+                _ ->
+                    -- TODO: Error handling
+                    ( model, NoEffect )
+
+
+type Effect
+    = NoEffect
+    | LoadUrl String
+    | PushUrl Url
+    | GetProgramData
+
+
+runEffect : Key -> Effect -> Cmd Msg
+runEffect key effect =
+    case effect of
+        NoEffect ->
+            Cmd.none
+
+        LoadUrl href ->
+            Navigation.load href
+
+        PushUrl url ->
+            Navigation.pushUrl key (Url.toString url)
+
+        GetProgramData ->
+            RemoteData.Http.get "/api/programs" ReceiveProgramData Types.programsDecoder
 
 
 
 -- VIEW
 
 
-view : Model -> Browser.Document Msg
+view : Model key -> Browser.Document Msg
 view model =
     case model.page of
         NotFound ->
@@ -149,7 +208,7 @@ view model =
         HealthProgram healthProgramModel ->
             { title = "Self Help Programs"
             , body =
-                [ HealthProgram.view healthProgramModel
+                [ HealthProgram.view healthProgramModel model.programData
                     |> Html.map HealthProgramMsg
                 ]
             }
