@@ -16,7 +16,7 @@ class Program(db.Model):
             'id'           : self.id,
             'name'         : self.name,
             'description'  : self.description,
-            'sections'     : [i.serialize() for i in self.sections]
+            'sections'     : [i.serialize_minimal() for i in self.sections]
         }
 
 class Section(db.Model):
@@ -35,6 +35,14 @@ class Section(db.Model):
 
     def __repr__(self):
         return '<Program {}>'.format(self.name)
+
+    def serialize_minimal(self):
+        return {
+            'id'           : self.id,
+            'name'         : self.name,
+            'overview_image'  : self.overview_image,
+            'order_index'  : self.order_index,
+        }
 
     def serialize(self):
         return {

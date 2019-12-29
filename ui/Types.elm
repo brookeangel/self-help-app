@@ -1,4 +1,4 @@
-module Types exposing (HealthProgram, ProgramData, ProgramId, SectionId, SectionOverview, initProgramData, programsDecoder, sectionsDecoder)
+module Types exposing (HealthProgram, ProgramData, ProgramId, Section, SectionId, SectionOverview, initProgramData, programsDecoder, sectionDecoder)
 
 import Dict exposing (..)
 import Json.Decode as Decode exposing (Decoder)
@@ -39,8 +39,19 @@ type alias HealthProgram =
 
 type alias SectionOverview =
     { id : SectionId
+    , orderIndex : Int
     , name : String
     , overviewImage : String
+    }
+
+
+type alias Section =
+    { id : SectionId
+    , orderIndex : Int
+    , name : String
+    , overviewImage : String
+    , description : String
+    , htmlContent : String
     }
 
 
@@ -51,15 +62,27 @@ programsDecoder =
             |> Decode.required "id" Decode.int
             |> Decode.required "name" Decode.string
             |> Decode.required "description" Decode.string
-            |> Decode.required "sections" sectionsDecoder
+            |> Decode.required "sections" sectionOverviewsDecoder
         )
 
 
-sectionsDecoder : Decoder (List SectionOverview)
-sectionsDecoder =
+sectionOverviewsDecoder : Decoder (List SectionOverview)
+sectionOverviewsDecoder =
     Decode.list
         (Decode.succeed SectionOverview
             |> Decode.required "id" Decode.int
+            |> Decode.required "order_index" Decode.int
             |> Decode.required "name" Decode.string
             |> Decode.required "overview_image" Decode.string
         )
+
+
+sectionDecoder : Decoder Section
+sectionDecoder =
+    Decode.succeed Section
+        |> Decode.required "id" Decode.int
+        |> Decode.required "order_index" Decode.int
+        |> Decode.required "name" Decode.string
+        |> Decode.required "overview_image" Decode.string
+        |> Decode.required "description" Decode.string
+        |> Decode.required "html_content" Decode.string

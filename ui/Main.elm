@@ -10,7 +10,7 @@ import RemoteData exposing (RemoteData(..), WebData)
 import RemoteData.Http
 import Route exposing (Route)
 import Section
-import Types exposing (HealthProgram, ProgramData)
+import Types exposing (HealthProgram, ProgramData, Section, SectionId)
 import Url exposing (Url)
 
 
@@ -40,6 +40,7 @@ type alias Model key =
     { key : key
     , page : Page
     , programData : WebData ProgramData
+    , sectionData : Dict SectionId (WebData Section)
     }
 
 
@@ -57,10 +58,11 @@ init () url key =
 initModel : key -> Model key
 initModel key =
     { key = key
-    , page = NotFound
 
     -- Requires a page; NotFound is our empty page but we could make this more descriptive, e.g. Loading
-    , programData = Loading
+    , page = NotFound
+    , programData = NotAsked
+    , sectionData = Dict.empty
     }
 
 
@@ -74,16 +76,32 @@ changeRouteTo maybeRoute model =
 
                 Just Route.Programs ->
                     ( HealthProgram HealthProgram.init
-                    , GetProgramData
-                      -- TODO: only fetch if the cache isn't populated
+                    , case model.programData of
+                        NotAsked ->
+                            GetProgramData
+
+                        _ ->
+                            NoEffect
                     )
 
                 Just (Route.Section id) ->
                     let
                         sectionModel =
                             Section.init id
+
+                        effect =
+                            case Dict.get id model.sectionData of
+                                Nothing ->
+                                    -- We haven't fetched yet, fetch data
+                                    GetSectionData id
+
+                                Just _ ->
+                                    -- Already fetched, do nothing
+                                    NoEffect
                     in
-                    ( Section sectionModel, NoEffect )
+                    ( Section sectionModel
+                    , effect
+                    )
     in
     ( { model | page = page }
     , theCmd
@@ -100,6 +118,7 @@ type Msg
     | HealthProgramMsg HealthProgram.Msg
     | SectionMsg Section.Msg
     | ReceiveProgramData (WebData (List HealthProgram))
+    | ReceiveSectionData (WebData Section)
 
 
 update : Msg -> Model key -> ( Model key, Effect )
@@ -169,12 +188,27 @@ update msg model =
                     -- TODO: Error handling
                     ( model, NoEffect )
 
+        ReceiveSectionData remoteData ->
+            case remoteData of
+                Success section ->
+                    ( { model
+                        | sectionData =
+                            Dict.insert section.id (Success section) model.sectionData
+                      }
+                    , NoEffect
+                    )
+
+                _ ->
+                    -- TODO: Error handling
+                    ( model, NoEffect )
+
 
 type Effect
     = NoEffect
     | LoadUrl String
     | PushUrl Url
     | GetProgramData
+    | GetSectionData SectionId
 
 
 runEffect : Key -> Effect -> Cmd Msg
@@ -191,6 +225,9 @@ runEffect key effect =
 
         GetProgramData ->
             RemoteData.Http.get "/api/programs" ReceiveProgramData Types.programsDecoder
+
+        GetSectionData id ->
+            RemoteData.Http.get ("/api/sections/" ++ String.fromInt id) ReceiveSectionData Types.sectionDecoder
 
 
 

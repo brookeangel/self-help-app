@@ -88,10 +88,12 @@ programMockData =
                 [ { id = 101
                   , name = "Core Section 1"
                   , overviewImage = "http://placecorgi.com/250"
+                  , orderIndex = 1
                   }
                 , { id = 102
                   , name = "Core Section 2"
                   , overviewImage = "http://placekitten.com/200/200"
+                  , orderIndex = 2
                   }
                 ]
           }
