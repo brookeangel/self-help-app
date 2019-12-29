@@ -2,6 +2,7 @@ module MainSpec exposing (tests)
 
 import Dict
 import Expect exposing (Expectation)
+import HealthProgram
 import Main
 import ProgramTest exposing (ProgramTest)
 import RemoteData
@@ -22,7 +23,7 @@ init =
         |> ProgramTest.withBaseUrl "http://myapp.com"
         |> ProgramTest.start ()
         |> ProgramTest.update
-            (Main.ReceiveData programMockData)
+            (Main.HealthProgramMsg <| HealthProgram.ReceiveData programMockData)
 
 
 tests : Test
