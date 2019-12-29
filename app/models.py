@@ -13,6 +13,9 @@ class Program(db.Model):
 
 class Section(db.Model):
     __tablename__ = 'sections'
+    __table_args__ = (
+        db.UniqueConstraint('program_id', 'order_index', name='program_order_index'),
+    )
 
     id = db.Column(db.Integer, primary_key=True)
     program_id = db.Column(db.Integer, db.ForeignKey('programs.id'))
