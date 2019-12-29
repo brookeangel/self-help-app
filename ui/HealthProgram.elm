@@ -2,9 +2,9 @@ module HealthProgram exposing (Model, Msg(..), init, update, view)
 
 import Dialog
 import Dict exposing (Dict)
-import Html exposing (Html)
-import Html.Attributes as Attributes
-import Html.Events as Events
+import Html.Styled as Html exposing (Html)
+import Html.Styled.Attributes as Attributes
+import Html.Styled.Events as Events
 import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Pipeline as Decode
 import RemoteData exposing (RemoteData(..), WebData)
@@ -116,23 +116,25 @@ viewSections sections =
 
 viewModal : Modal -> Dict ProgramId HealthProgram -> Html Msg
 viewModal modal programsById =
-    Dialog.view <|
-        case modal of
-            NoModal ->
-                Nothing
+    (case modal of
+        NoModal ->
+            Nothing
 
-            ProgramModal programId ->
-                let
-                    maybeProgram =
-                        Dict.get programId programsById
-                in
-                Maybe.map
-                    (\program ->
-                        { closeMessage = Just (SetModal NoModal)
-                        , containerClass = Nothing
-                        , header = Just (Html.h2 [] [ Html.text program.name ])
-                        , body = Just (Html.text program.description)
-                        , footer = Nothing
-                        }
-                    )
-                    maybeProgram
+        ProgramModal programId ->
+            let
+                maybeProgram =
+                    Dict.get programId programsById
+            in
+            Maybe.map
+                (\program ->
+                    { closeMessage = Just (SetModal NoModal)
+                    , containerClass = Nothing
+                    , header = Just (Html.h2 [] [ Html.text program.name ] |> Html.toUnstyled)
+                    , body = Just (Html.text program.description |> Html.toUnstyled)
+                    , footer = Nothing
+                    }
+                )
+                maybeProgram
+    )
+        |> Dialog.view
+        |> Html.fromUnstyled

@@ -2,10 +2,12 @@ module Main exposing (Effect, Model, Msg(..), init, main, update, view)
 
 import Browser
 import Browser.Navigation as Navigation exposing (Key)
+import Css.Reset as CssReset
 import Dialog
 import Dict exposing (Dict)
 import HealthProgram
-import Html exposing (Html)
+import Html as RootHtml
+import Html.Styled as Html exposing (Html)
 import RemoteData exposing (RemoteData(..), WebData)
 import RemoteData.Http
 import Route exposing (Route)
@@ -218,15 +220,16 @@ view model =
     case model.page of
         NotFound ->
             { title = "Not found"
-            , body = [ Html.text "Not found" ]
+            , body = toBody (Html.text "Not found")
             }
 
         HealthProgram healthProgramModel ->
             { title = "Self Help Programs"
             , body =
-                [ HealthProgram.view healthProgramModel model.programData
-                    |> Html.map HealthProgramMsg
-                ]
+                toBody
+                    (HealthProgram.view healthProgramModel model.programData
+                        |> Html.map HealthProgramMsg
+                    )
             }
 
         Section id ->
@@ -237,5 +240,12 @@ view model =
             in
             { title = "Self Help Section"
             , body =
-                [ Section.view sectionWebdata ]
+                toBody (Section.view sectionWebdata)
             }
+
+
+toBody : Html Msg -> List (RootHtml.Html Msg)
+toBody content =
+    [ CssReset.meyerV2 |> Html.toUnstyled
+    , content |> Html.toUnstyled
+    ]

@@ -2,10 +2,10 @@ module Section exposing (view)
 
 import Dialog
 import Dict exposing (Dict)
-import Html exposing (Html)
-import Html.Attributes as Attributes
-import Html.Attributes.Extra as Attributes
-import Html.Events as Events
+import Html.Attributes.Extra as UnstyledAttributes
+import Html.Styled as Html exposing (Html)
+import Html.Styled.Attributes as Attributes
+import Html.Styled.Events as Events
 import RemoteData exposing (RemoteData(..), WebData)
 import RemoteData.Http
 import Route
@@ -30,7 +30,9 @@ view webdata =
                 , Html.div
                     []
                     [ Html.div
-                        [ Attributes.stringProperty "innerHTML" section.htmlContent ]
+                        [ UnstyledAttributes.stringProperty "innerHTML" section.htmlContent
+                            |> Attributes.fromUnstyled
+                        ]
                         []
                     , Html.img [ Attributes.src section.overviewImage ] []
                     , Html.a [ Attributes.href "/" ] [ Html.text "Go Back" ]
