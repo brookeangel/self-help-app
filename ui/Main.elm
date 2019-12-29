@@ -1,4 +1,4 @@
-module Main exposing (Model, Msg, init, main, update, view)
+module Main exposing (Model, Msg(..), init, main, update, view)
 
 import Browser
 import Dialog
@@ -6,6 +6,10 @@ import Dict exposing (Dict)
 import Html exposing (Html)
 import Html.Attributes as Attributes
 import Html.Events as Events
+import Json.Decode as Decode exposing (Decoder)
+import Json.Decode.Pipeline as Decode
+import RemoteData exposing (RemoteData(..), WebData)
+import RemoteData.Http
 
 
 main : Program () Model Msg
@@ -23,13 +27,22 @@ main =
 
 
 type alias Model =
-    { programs : List HealthProgram
-    , programsById : Dict ProgramId HealthProgram
+    { data : WebData ProgramData
     , openModal : Modal
     }
 
 
+type alias ProgramData =
+    { programs : List HealthProgram
+    , programsById : Dict ProgramId HealthProgram
+    }
+
+
 type alias ProgramId =
+    Int
+
+
+type alias SectionId =
     Int
 
 
@@ -39,10 +52,6 @@ type alias HealthProgram =
     , description : String
     , sections : List Section
     }
-
-
-type alias SectionId =
-    Int
 
 
 type alias Section =
@@ -59,38 +68,42 @@ type Modal
 
 init : () -> ( Model, Cmd Msg )
 init () =
-    let
-        programs =
-            [ { id = 1
-              , name = "Core Pillars"
-              , description = "Core pillars description"
-              , sections =
-                    [ { id = 101
-                      , name = "Core Section 1"
-                      , overviewImage = "http://placecorgi.com/250"
-                      }
-                    , { id = 102
-                      , name = "Core Section 2"
-                      , overviewImage = "http://placekitten.com/200/200"
-                      }
-                    ]
-              }
-            , { id = 2
-              , name = "The Next Level"
-              , description = "The next level description"
-              , sections = []
-              }
-            ]
-    in
-    ( { programs = programs
-      , programsById =
-            programs
-                |> List.map (\program -> ( program.id, program ))
-                |> Dict.fromList
+    ( { data = Loading
       , openModal = NoModal
       }
-    , Cmd.none
+    , RemoteData.Http.get "/programs" ReceiveData programsDecoder
     )
+
+
+programsDecoder : Decoder (List HealthProgram)
+programsDecoder =
+    Decode.list
+        (Decode.succeed HealthProgram
+            |> Decode.required "id" Decode.int
+            |> Decode.required "name" Decode.string
+            |> Decode.required "description" Decode.string
+            |> Decode.required "sections" sectionsDecoder
+        )
+
+
+sectionsDecoder : Decoder (List Section)
+sectionsDecoder =
+    Decode.list
+        (Decode.succeed Section
+            |> Decode.required "id" Decode.int
+            |> Decode.required "name" Decode.string
+            |> Decode.required "overview_image" Decode.string
+        )
+
+
+initData : List HealthProgram -> ProgramData
+initData programs =
+    { programs = programs
+    , programsById =
+        programs
+            |> List.map (\program -> ( program.id, program ))
+            |> Dict.fromList
+    }
 
 
 
@@ -99,6 +112,7 @@ init () =
 
 type Msg
     = SetModal Modal
+    | ReceiveData (WebData (List HealthProgram))
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -107,6 +121,15 @@ update msg model =
         SetModal modal ->
             ( { model | openModal = modal }, Cmd.none )
 
+        ReceiveData remoteData ->
+            case remoteData of
+                Success healthPrograms ->
+                    ( { model | data = Success (initData healthPrograms) }, Cmd.none )
+
+                _ ->
+                    -- TODO: Error handling
+                    ( model, Cmd.none )
+
 
 
 -- VIEW
@@ -114,10 +137,22 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
+    let
+        programContent =
+            case model.data of
+                Success data ->
+                    Html.div []
+                        [ viewPrograms data.programs
+                        , viewModal model.openModal data.programsById
+                        ]
+
+                _ ->
+                    -- TODO: Add error handling
+                    Html.text "Loading..."
+    in
     Html.main_ []
         [ Html.h1 [] [ Html.text "All Programs" ]
-        , viewPrograms model.programs
-        , viewModal model.openModal model.programsById
+        , programContent
         ]
 
 

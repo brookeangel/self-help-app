@@ -1,8 +1,10 @@
 module MainSpec exposing (tests)
 
+import Dict
 import Expect exposing (Expectation)
 import Main
 import ProgramTest exposing (ProgramTest)
+import RemoteData
 import Test exposing (..)
 import Test.Html.Query as Query
 import Test.Html.Selector as Selector
@@ -16,6 +18,8 @@ init =
         , update = Main.update
         }
         |> ProgramTest.start ()
+        |> ProgramTest.update
+            (Main.ReceiveData programMockData)
 
 
 tests : Test
@@ -69,4 +73,28 @@ tests =
                                     ]
                         )
                     |> ProgramTest.done
+        ]
+
+
+programMockData =
+    RemoteData.Success
+        [ { id = 1
+          , name = "Core Pillars"
+          , description = "Core pillars description"
+          , sections =
+                [ { id = 101
+                  , name = "Core Section 1"
+                  , overviewImage = "http://placecorgi.com/250"
+                  }
+                , { id = 102
+                  , name = "Core Section 2"
+                  , overviewImage = "http://placekitten.com/200/200"
+                  }
+                ]
+          }
+        , { id = 2
+          , name = "The Next Level"
+          , description = "The next level description"
+          , sections = []
+          }
         ]
