@@ -1,5 +1,16 @@
 # Self-Help App
 
+An app that helps people access self help programs!
+
+Health Programs
+![](./docs/images/health-programs.png)
+
+Modal
+![](./docs/images/modal.png)
+
+Sections
+![](./docs/images/sections.png)
+
 ## Future Directions
 Important things to add that are not-yet-here:
 - Python tests
