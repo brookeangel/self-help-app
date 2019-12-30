@@ -53,7 +53,7 @@ tests =
                                 |> ProgramTest.clickButton "Learn More"
                         )
                     |> ProgramTest.ensureViewHas [ Selector.text "Core pillars description" ]
-                    |> ProgramTest.clickButton "x"
+                    |> ProgramTest.clickButton "Close Modal"
                     |> ProgramTest.expectViewHasNot [ Selector.text "Core pillars description" ]
         , test "Renders a list sections" <|
             \() ->
