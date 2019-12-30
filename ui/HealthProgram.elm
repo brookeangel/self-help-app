@@ -1,5 +1,6 @@
 module HealthProgram exposing (Model, Msg(..), init, update, view)
 
+import Css
 import Dialog
 import Dict exposing (Dict)
 import Html.Styled as Html exposing (Html)
@@ -12,6 +13,7 @@ import RemoteData.Http
 import Route
 import Types exposing (..)
 import Url exposing (Url)
+import ViewHelpers
 
 
 
@@ -65,10 +67,10 @@ view model programData =
 
                 _ ->
                     -- TODO: Add error handling
-                    Html.text "Loading..."
+                    ViewHelpers.p "Loading..."
     in
-    Html.main_ []
-        [ Html.h1 [] [ Html.text "All Programs" ]
+    Html.div []
+        [ ViewHelpers.h1 [ Html.text "All Programs" ]
         , programContent
         ]
 
@@ -78,12 +80,29 @@ viewPrograms programs =
     programs
         |> List.map
             (\program ->
-                Html.section []
-                    [ Html.h2 [] [ Html.text program.name ]
-                    , Html.button
-                        [ Events.onClick (SetModal <| ProgramModal program.id)
+                Html.section
+                    []
+                    [ Html.div
+                        [ Attributes.css
+                            [ Css.displayFlex
+                            , Css.alignItems Css.center
+                            , Css.justifyContent Css.spaceBetween
+                            ]
                         ]
-                        [ Html.text "Learn More"
+                        [ ViewHelpers.h2 [ Html.text program.name ]
+                        , Html.button
+                            [ Events.onClick (SetModal <| ProgramModal program.id)
+                            , Attributes.css
+                                [ Css.cursor Css.pointer
+                                , Css.textDecoration Css.underline
+                                , Css.fontSize (Css.px 14)
+                                , Css.backgroundColor Css.transparent
+                                , Css.border Css.zero
+                                , Css.margin (Css.px 5)
+                                ]
+                            ]
+                            [ Html.text "Learn More"
+                            ]
                         ]
                     , viewSections program.sections
                     ]
@@ -91,8 +110,6 @@ viewPrograms programs =
         |> Html.div []
 
 
-{-| TODO: ensure ordering
--}
 viewSections : List SectionOverview -> Html Msg
 viewSections sections =
     sections
@@ -101,17 +118,40 @@ viewSections sections =
             (\section ->
                 Html.a
                     [ Attributes.href (Route.toString (Route.Section section.id))
+                    , Attributes.css
+                        [ Css.textDecoration Css.none
+                        , Css.cursor Css.pointer
+                        , Css.width (Css.px 250)
+                        , Css.height (Css.px 325)
+                        , Css.margin (Css.px 15)
+                        , Css.padding (Css.px 15)
+                        , Css.boxShadow4 (Css.px 2) (Css.px 2) (Css.px 7) (Css.rgba 0 0 0 0.2)
+                        , Css.color ViewHelpers.steelblue
+                        , Css.displayFlex
+                        , Css.flexDirection Css.column
+                        , Css.justifyContent Css.spaceBetween
+                        ]
                     ]
                     [ Html.img
                         [ Attributes.src section.overviewImage
                         , Attributes.alt ""
+                        , Attributes.css
+                            [ Css.width (Css.px 200)
+                            , Css.height (Css.px 200)
+                            , Css.margin2 (Css.px 10) Css.auto
+                            , Css.display Css.block
+                            ]
                         ]
                         []
-                    , Html.p [] [ Html.text ("Part " ++ String.fromInt section.orderIndex) ] -- TODO: this should be the "word" version of the string, e.g. "one"
-                    , Html.h3 [] [ Html.text section.name ]
+                    , Html.div []
+                        [ ViewHelpers.p ("Part " ++ String.fromInt section.orderIndex) -- TODO: this should be the "word" version of the string, e.g. "one"
+                        , ViewHelpers.h3 [ Html.text section.name ]
+                        ]
                     ]
             )
-        |> Html.div []
+        |> Html.div
+            [ Attributes.css [ Css.displayFlex ]
+            ]
 
 
 viewModal : Modal -> Dict ProgramId HealthProgram -> Html Msg
@@ -129,7 +169,7 @@ viewModal modal programsById =
                 (\program ->
                     { closeMessage = Just (SetModal NoModal)
                     , containerClass = Nothing
-                    , header = Just (Html.h2 [] [ Html.text program.name ] |> Html.toUnstyled)
+                    , header = Just (ViewHelpers.h2 [ Html.text program.name ] |> Html.toUnstyled)
                     , body = Just (Html.text program.description |> Html.toUnstyled)
                     , footer = Nothing
                     }

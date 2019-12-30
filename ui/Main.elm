@@ -2,12 +2,14 @@ module Main exposing (Effect, Model, Msg(..), init, main, update, view)
 
 import Browser
 import Browser.Navigation as Navigation exposing (Key)
+import Css
 import Css.Reset as CssReset
 import Dialog
 import Dict exposing (Dict)
 import HealthProgram
 import Html as RootHtml
 import Html.Styled as Html exposing (Html)
+import Html.Styled.Attributes as Attributes
 import RemoteData exposing (RemoteData(..), WebData)
 import RemoteData.Http
 import Route exposing (Route)
@@ -246,6 +248,14 @@ view model =
 
 toBody : Html Msg -> List (RootHtml.Html Msg)
 toBody content =
-    [ CssReset.meyerV2 |> Html.toUnstyled
-    , content |> Html.toUnstyled
+    [ CssReset.meyerV2
+    , Html.main_
+        [ Attributes.css
+            [ Css.width (Css.px 800)
+            , Css.margin Css.auto
+            , Css.fontFamilies [ "Open Sans", "sans-serif" ]
+            ]
+        ]
+        [ content ]
     ]
+        |> List.map Html.toUnstyled
