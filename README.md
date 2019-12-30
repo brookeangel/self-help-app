@@ -33,3 +33,6 @@ Important things to add that are not-yet-here:
 
 ### Testing
 - Elm tests: `npm test`
+
+### License
+[License](./LICENSE.txt)
