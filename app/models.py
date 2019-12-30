@@ -1,4 +1,5 @@
 from app import db
+import forgery_py as forgery
 
 class Program(db.Model):
     __tablename__ = 'programs'
@@ -18,6 +19,21 @@ class Program(db.Model):
             'description'  : self.description,
             'sections'     : [i.serialize_minimal() for i in self.sections]
         }
+    
+    @staticmethod
+    def seed(records=10):
+        for record in range(records):
+            program = Program(
+                name = forgery.lorem_ipsum.title(),
+                description = forgery.lorem_ipsum.sentence(),
+            )
+            db.session.add(program)
+        try:
+            print("commiting program seed data")
+            db.session.commit()
+        except:
+            db.session.rollback()
+
 
 class Section(db.Model):
     __tablename__ = 'sections'
@@ -53,3 +69,24 @@ class Section(db.Model):
             'order_index'  : self.order_index,
             'html_content' : self.html_content
         }
+
+    @staticmethod
+    def seed(records=4):
+        programs = Program.query.all()
+
+        # TODO: why not seeding properly
+        for program in programs:
+            for record in range(records):
+                section = Section(
+                    name = forgery.lorem_ipsum.title(),
+                    program_id = program.id,
+                    description = forgery.lorem_ipsum.sentence(),
+                    overview_image = "http://placecorgi.com/250",
+                    order_index = record,
+                    html_content = "<ul><li>Point 1</li><li>Point 2</li><li>Point3</li></ul>"
+                )
+                db.session.add(section)
+        try:
+            db.session.commit()
+        except:
+            db.session.rollback()

@@ -1,9 +1,10 @@
-# Modern Health
+# Self-Help App
 
 ## Future Directions
 Important things to add that are not-yet-here:
 - Python tests
-- Generalize frontend build (right now, we only build one Elm app, but this should be generalized to build more)
+- Generalize frontend build (right now, we only build one Elm entrypoint, but this should be generalized to build more)
+- Dockerize, so that all we have to run is `docker-compose up` to start this project
 
 ## Development
 
@@ -20,6 +21,7 @@ Important things to add that are not-yet-here:
 # create database modern_health_dev;
 ```
 - Run DB migrations: `flask db upgrade`
+- Seed DB: `flask seed`
 
 ### Build Elm
 - `npm install`

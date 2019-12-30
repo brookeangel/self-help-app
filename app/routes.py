@@ -11,7 +11,7 @@ def index(id=None):
 
 @app.route('/api/programs')
 def programs():
-    programs = Program.query.options(joinedload(Program.sections, innerjoin=True)).all()
+    programs = Program.query.options(joinedload(Program.sections, innerjoin=False)).all()
 
     return jsonify([i.serialize() for i in programs])
 
