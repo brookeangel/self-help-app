@@ -18,7 +18,7 @@ Important things to add that are not-yet-here:
 - Create database:
 ```
 > psql
-# create database modern_health_dev;
+# create database self_help_dev;
 ```
 - Run DB migrations: `flask db upgrade`
 - Seed DB: `flask seed`
