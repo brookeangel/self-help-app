@@ -25,7 +25,7 @@ class Program(db.Model):
         for record in range(records):
             program = Program(
                 name = forgery.lorem_ipsum.title(),
-                description = forgery.lorem_ipsum.sentence(),
+                description = forgery.lorem_ipsum.word(),
             )
             db.session.add(program)
         try:
@@ -78,11 +78,11 @@ class Section(db.Model):
         for program in programs:
             for record in range(records):
                 section = Section(
-                    name = forgery.lorem_ipsum.title(),
+                    name = forgery.lorem_ipsum.word(),
                     program_id = program.id,
                     description = forgery.lorem_ipsum.sentence(),
                     overview_image = "http://placecorgi.com/250",
-                    order_index = record,
+                    order_index = record + 1,
                     html_content = "<ul><li>Point 1</li><li>Point 2</li><li>Point3</li></ul>"
                 )
                 db.session.add(section)
