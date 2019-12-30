@@ -70,7 +70,9 @@ view model programData =
                     ViewHelpers.p "Loading..."
     in
     Html.div []
-        [ ViewHelpers.h1 [ Html.text "All Programs" ]
+        [ Html.div [ Attributes.css [ Css.marginBottom (Css.px 40) ] ]
+            [ ViewHelpers.h1 [ Html.text "All Programs" ]
+            ]
         , programContent
         ]
 
@@ -81,7 +83,8 @@ viewPrograms programs =
         |> List.map
             (\program ->
                 Html.section
-                    []
+                    [ Attributes.css [ Css.marginBottom (Css.px 40) ]
+                    ]
                     [ Html.div
                         [ Attributes.css
                             [ Css.displayFlex
@@ -89,7 +92,11 @@ viewPrograms programs =
                             , Css.justifyContent Css.spaceBetween
                             ]
                         ]
-                        [ ViewHelpers.h2 [ Html.text program.name ]
+                        [ Html.div
+                            [ Attributes.css [ Css.marginBottom (Css.px 20) ]
+                            ]
+                            [ ViewHelpers.h2 [ Html.text program.name ]
+                            ]
                         , Html.button
                             [ Events.onClick (SetModal <| ProgramModal program.id)
                             , Attributes.css
@@ -99,6 +106,7 @@ viewPrograms programs =
                                 , Css.backgroundColor Css.transparent
                                 , Css.border Css.zero
                                 , Css.margin (Css.px 5)
+                                , Css.color ViewHelpers.darkGrey
                                 ]
                             ]
                             [ Html.text "Learn More"
@@ -121,36 +129,39 @@ viewSections sections =
                     , Attributes.css
                         [ Css.textDecoration Css.none
                         , Css.cursor Css.pointer
-                        , Css.width (Css.px 250)
-                        , Css.height (Css.px 325)
-                        , Css.margin (Css.px 15)
                         , Css.padding (Css.px 15)
                         , Css.boxShadow4 (Css.px 2) (Css.px 2) (Css.px 7) (Css.rgba 0 0 0 0.2)
                         , Css.color ViewHelpers.steelblue
                         , Css.displayFlex
                         , Css.flexDirection Css.column
                         , Css.justifyContent Css.spaceBetween
+                        , Css.borderRadius (Css.px 4)
                         ]
                     ]
                     [ Html.img
                         [ Attributes.src section.overviewImage
                         , Attributes.alt ""
                         , Attributes.css
-                            [ Css.width (Css.px 200)
-                            , Css.height (Css.px 200)
-                            , Css.margin2 (Css.px 10) Css.auto
+                            [ Css.width (Css.px 150)
+                            , Css.height (Css.px 150)
+                            , Css.margin4 (Css.px 10) Css.auto (Css.px 30) Css.auto
                             , Css.display Css.block
                             ]
                         ]
                         []
                     , Html.div []
-                        [ ViewHelpers.p ("Part " ++ String.fromInt section.orderIndex) -- TODO: this should be the "word" version of the string, e.g. "one"
+                        [ ViewHelpers.p ("Part " ++ ViewHelpers.intToWord section.orderIndex)
                         , ViewHelpers.h3 [ Html.text section.name ]
                         ]
                     ]
             )
         |> Html.div
-            [ Attributes.css [ Css.displayFlex ]
+            [ Attributes.css
+                [ Css.property "display" "grid"
+                , Css.property "grid-template-columns" "235px 235px 235px 235px"
+                , Css.property "grid-template-rows" "auto"
+                , Css.property "grid-column-gap" "20px"
+                ]
             ]
 
 

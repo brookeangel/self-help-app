@@ -1,4 +1,4 @@
-module ViewHelpers exposing (h1, h2, h3, p, steelblue)
+module ViewHelpers exposing (darkGrey, h1, h2, h3, intToWord, p, steelblue)
 
 import Css
 import Html.Styled as Html exposing (Html)
@@ -35,7 +35,7 @@ h2 : List (Html msg) -> Html msg
 h2 =
     Html.h2
         [ css
-            [ Css.fontSize (Css.px 30)
+            [ Css.fontSize (Css.px 24)
             , Css.color steelblue
             , Css.fontWeight (Css.int 700)
             , Css.marginBottom (Css.px 10)
@@ -47,7 +47,7 @@ h3 : List (Html msg) -> Html msg
 h3 =
     Html.h3
         [ css
-            [ Css.fontSize (Css.px 24)
+            [ Css.fontSize (Css.px 20)
             , Css.color steelblue
             , Css.fontWeight (Css.int 700)
             , Css.marginBottom (Css.px 10)
@@ -57,4 +57,49 @@ h3 =
 
 steelblue : Css.Color
 steelblue =
-    Css.hex "4682b4"
+    Css.hex "4B75A7"
+
+
+darkGrey : Css.Color
+darkGrey =
+    Css.hex "595B5C"
+
+
+{-| Weirdly, I can't find an Elm package for this. Note: this only works up to 10
+-}
+intToWord : Int -> String
+intToWord int =
+    case int of
+        1 ->
+            "one"
+
+        2 ->
+            "two"
+
+        3 ->
+            "three"
+
+        4 ->
+            "four"
+
+        5 ->
+            "five"
+
+        6 ->
+            "six"
+
+        7 ->
+            "seven"
+
+        8 ->
+            "eight"
+
+        9 ->
+            "nine"
+
+        10 ->
+            "ten"
+
+        _ ->
+            -- Non-ideal, but alright
+            String.fromInt int

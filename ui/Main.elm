@@ -251,8 +251,8 @@ toBody content =
     [ CssReset.meyerV2
     , Html.main_
         [ Attributes.css
-            [ Css.width (Css.px 800)
-            , Css.margin Css.auto
+            [ Css.width (Css.px 1000)
+            , Css.margin2 (Css.px 50) Css.auto
             , Css.fontFamilies [ "Open Sans", "sans-serif" ]
             ]
         ]
