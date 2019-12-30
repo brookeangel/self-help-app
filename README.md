@@ -2,13 +2,15 @@
 
 An app that helps people access self help programs!
 
-Health Programs
+## Screenshots
+
+### Health Programs
 ![](./docs/images/health-programs.png)
 
-Modal
+### Modal
 ![](./docs/images/modal.png)
 
-Sections
+### Sections
 ![](./docs/images/sections.png)
 
 ## Future Directions
