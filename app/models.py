@@ -74,7 +74,6 @@ class Section(db.Model):
     def seed(records=4):
         programs = Program.query.all()
 
-        # TODO: why not seeding properly
         for program in programs:
             for record in range(records):
                 section = Section(
