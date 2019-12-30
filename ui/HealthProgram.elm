@@ -8,6 +8,7 @@ import Html.Styled.Attributes as Attributes
 import Html.Styled.Events as Events
 import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Pipeline as Decode
+import Json.Encode
 import RemoteData exposing (RemoteData(..), WebData)
 import RemoteData.Http
 import Route
@@ -167,25 +168,59 @@ viewSections sections =
 
 viewModal : Modal -> Dict ProgramId HealthProgram -> Html Msg
 viewModal modal programsById =
-    (case modal of
+    case modal of
         NoModal ->
-            Nothing
+            Html.text ""
 
         ProgramModal programId ->
             let
                 maybeProgram =
                     Dict.get programId programsById
             in
-            Maybe.map
-                (\program ->
-                    { closeMessage = Just (SetModal NoModal)
-                    , containerClass = Nothing
-                    , header = Just (ViewHelpers.h2 [ Html.text program.name ] |> Html.toUnstyled)
-                    , body = Just (Html.text program.description |> Html.toUnstyled)
-                    , footer = Nothing
-                    }
-                )
-                maybeProgram
-    )
-        |> Dialog.view
-        |> Html.fromUnstyled
+            maybeProgram
+                |> Maybe.map
+                    (\program ->
+                        Html.div
+                            [ Attributes.css
+                                [ Css.display Css.block
+                                , Css.position Css.fixed
+                                , Css.width (Css.vw 100)
+                                , Css.height (Css.vh 100)
+                                , Css.top Css.zero
+                                , Css.left Css.zero
+                                , Css.backgroundColor (Css.rgba 100 100 100 0.7)
+                                , Css.displayFlex
+                                , Css.alignItems Css.center
+                                , Css.justifyContent Css.center
+                                ]
+                            , Events.onClick (SetModal NoModal)
+                            ]
+                            [ Html.div
+                                [ Attributes.property "role" (Json.Encode.string "dialog")
+                                , Attributes.css
+                                    [ Css.width (Css.vw 50)
+                                    , Css.height (Css.vh 50)
+                                    , Css.displayFlex
+                                    , Css.padding (Css.px 50)
+                                    , Css.backgroundColor (Css.hex "FFFFFF")
+                                    , Css.boxShadow4 (Css.px 2) (Css.px 2) (Css.px 7) (Css.rgba 0 0 0 0.2)
+                                    , Css.borderRadius (Css.px 4)
+                                    , Css.justifyContent Css.center
+                                    , Css.alignItems Css.center
+                                    , Css.flexDirection Css.column
+                                    ]
+                                ]
+                                [ ViewHelpers.h2
+                                    [ Html.text "Description: "
+                                    , Html.text program.name
+                                    ]
+                                , ViewHelpers.p program.description
+                                , Html.button
+                                    [ Events.onClick (SetModal NoModal)
+                                    ]
+                                    [ Html.text "Close Modal"
+                                    ]
+                                ]
+                            ]
+                    )
+                |> Maybe.withDefault (Html.text "")
