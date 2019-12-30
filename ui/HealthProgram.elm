@@ -1,7 +1,6 @@
 module HealthProgram exposing (Model, Msg(..), init, update, view)
 
 import Css
-import Dialog
 import Dict exposing (Dict)
 import Html.Styled as Html exposing (Html)
 import Html.Styled.Attributes as Attributes
@@ -216,7 +215,8 @@ viewModal modal programsById =
                                     ]
                                 , ViewHelpers.p program.description
                                 , Html.button
-                                    [ Events.onClick (SetModal NoModal)
+                                    [ ViewHelpers.buttonStyles
+                                    , Events.onClick (SetModal NoModal)
                                     ]
                                     [ Html.text "Close Modal"
                                     ]

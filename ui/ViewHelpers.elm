@@ -1,7 +1,7 @@
-module ViewHelpers exposing (darkGrey, h1, h2, h3, intToWord, p, steelblue)
+module ViewHelpers exposing (buttonStyles, darkGrey, h1, h2, h3, intToWord, lightGrey, p, steelblue)
 
 import Css
-import Html.Styled as Html exposing (Html)
+import Html.Styled as Html exposing (Attribute, Html)
 import Html.Styled.Attributes exposing (css)
 
 
@@ -65,6 +65,11 @@ darkGrey =
     Css.hex "595B5C"
 
 
+lightGrey : Css.Color
+lightGrey =
+    Css.hex "D6DDE1"
+
+
 {-| Weirdly, I can't find an Elm package for this. Note: this only works up to 10
 -}
 intToWord : Int -> String
@@ -103,3 +108,21 @@ intToWord int =
         _ ->
             -- Non-ideal, but alright
             String.fromInt int
+
+
+buttonStyles : Attribute msg
+buttonStyles =
+    css
+        [ Css.width (Css.px 150)
+        , Css.height (Css.px 35)
+        , Css.color steelblue
+        , Css.borderRadius (Css.px 4)
+        , Css.display Css.inlineBlock
+        , Css.border3 (Css.px 2) Css.solid lightGrey
+        , Css.displayFlex
+        , Css.alignItems Css.center
+        , Css.justifyContent Css.center
+        , Css.textDecoration Css.none
+        , Css.cursor Css.pointer
+        , Css.fontSize (Css.px 14)
+        ]

@@ -4,7 +4,6 @@ import Browser
 import Browser.Navigation as Navigation exposing (Key)
 import Css
 import Css.Reset as CssReset
-import Dialog
 import Dict exposing (Dict)
 import HealthProgram
 import Html as RootHtml
@@ -254,6 +253,7 @@ toBody content =
             [ Css.width (Css.px 1000)
             , Css.margin2 (Css.px 50) Css.auto
             , Css.fontFamilies [ "Open Sans", "sans-serif" ]
+            , Css.lineHeight (Css.pct 150)
             ]
         ]
         [ content ]
